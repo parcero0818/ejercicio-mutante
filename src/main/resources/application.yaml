@@ -1,0 +1,8 @@
+spring:
+   data:
+      mongodb:
+         uri: mongodb+srv://root:root@sec.usznt.mongodb.net/secuencias?retryWrites=true&w=majority
+server:
+   port: 8199
+   servlet:
+      context-path: /mutante
