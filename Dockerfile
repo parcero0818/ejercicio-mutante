@@ -1,4 +1,4 @@
-FROM openjdk:13-jdk
+FROM adoptopenjdk/openjdk15:ubi
 VOLUME /tmp
 ADD ./build/libs/*.jar app.jar
 EXPOSE 8199
