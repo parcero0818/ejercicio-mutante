@@ -8,29 +8,32 @@ package com.mercadolibre.ejerciciomutante.domain;
  */
 public class Response {
 
-    private int status;
-    private String userMessage;
+    private Integer countMutantDna;
+    private Integer countHumanDan;
+    private Double ratio;
 
-    public Response(int status, String userMessage) {
-        super();
-        this.status = status;
-        this.userMessage = userMessage;
+    public Integer getCountMutantDna() {
+        return countMutantDna;
     }
 
-    public int getStatus() {
-        return status;
+    public void setCountMutantDna(Integer countMutantDna) {
+        this.countMutantDna = countMutantDna;
     }
 
-    public void setStatus(int status) {
-        this.status = status;
+    public Integer getCountHumanDan() {
+        return countHumanDan;
     }
 
-    public String getUserMessage() {
-        return userMessage;
+    public void setCountHumanDan(Integer countHumanDan) {
+        this.countHumanDan = countHumanDan;
     }
 
-    public void setUserMessage(String userMessage) {
-        this.userMessage = userMessage;
+    public Double getRatio() {
+        return ratio;
+    }
+
+    public void setRatio(Double ratio) {
+        this.ratio = ratio;
     }
 
 }

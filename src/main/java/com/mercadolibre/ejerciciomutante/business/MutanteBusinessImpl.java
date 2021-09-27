@@ -13,6 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import com.mercadolibre.ejerciciomutante.domain.DnaDTO;
+import com.mercadolibre.ejerciciomutante.domain.Response;
 import com.mercadolibre.ejerciciomutante.excepcion.MutanteExcepcion;
 import com.mercadolibre.ejerciciomutante.model.Secuencia;
 import com.mercadolibre.ejerciciomutante.repository.SecuenciaRepository;
@@ -25,18 +26,21 @@ import com.mercadolibre.ejerciciomutante.util.Validacion;
  *
  */
 @Service
-public class MutanteServiceImpl implements MutanteService {
+public class MutanteBusinessImpl implements MutanteBusiness {
 
-    private final Logger LOGGER = LoggerFactory.getLogger(MutanteServiceImpl.class);
+    private final Logger LOGGER = LoggerFactory.getLogger(MutanteBusinessImpl.class);
     private final Validacion validacion;
     private final SecuenciaRepository secuenciaRepository;
 
     @Autowired
-    public MutanteServiceImpl(Validacion validacion, SecuenciaRepository secuenciaRepository) {
+    public MutanteBusinessImpl(Validacion validacion, SecuenciaRepository secuenciaRepository) {
         this.validacion = validacion;
         this.secuenciaRepository = secuenciaRepository;
     }
 
+    /**
+     * Permite validar la cadena de adn ingresada para conocer si es de un mutante o de un humano
+     */
     @Override
     public ResponseEntity<String> validarMutante(DnaDTO dnaDto) {
         try {
@@ -67,6 +71,14 @@ public class MutanteServiceImpl implements MutanteService {
         }
     }
 
+    /**
+     * Permite obtener las diferentes combinaciones de la matriz para verificar si tiene una cadena mutante
+     * 
+     * @param dna
+     * @param secuencias
+     * @param longitudSecuencia
+     * @return
+     */
     private List<String> obtenerCombinaciones(String[] dna, char[][] secuencias, int longitudSecuencia) {
         List<String> combinaciones = new ArrayList<>();
         combinaciones.addAll(Arrays.asList(dna));
@@ -79,6 +91,13 @@ public class MutanteServiceImpl implements MutanteService {
         return combinaciones;
     }
 
+    /**
+     * Permite obtener las combinaciones de las columnas de la matriz
+     * 
+     * @param secuenciaDna
+     * @param longitudSecuencia
+     * @return
+     */
     private List<String> obtenerColumnas(char[][] secuenciaDna, int longitudSecuencia) {
         List<String> combinaciones = new ArrayList<>();
         for (int i = 0; i < longitudSecuencia; i++) {
@@ -91,6 +110,13 @@ public class MutanteServiceImpl implements MutanteService {
         return combinaciones;
     }
 
+    /**
+     * Permite obtener las combinaciones del inferior izquierdo de la matriz
+     * 
+     * @param secuenciaDna
+     * @param longitudSecuencia
+     * @return
+     */
     private List<String> obtenerInfIzq(char[][] secuenciaDna, int longitudSecuencia) {
         List<String> combinaciones = new ArrayList<>();
         for (int i = 3; i < longitudSecuencia; i++) {
@@ -105,6 +131,13 @@ public class MutanteServiceImpl implements MutanteService {
         return combinaciones;
     }
 
+    /**
+     * Permite obtener las combinaciones del superior izquierdo de la matriz
+     * 
+     * @param secuenciaDna
+     * @param longitudSecuencia
+     * @return
+     */
     private List<String> obtenerSupIzq(char[][] secuenciaDna, int longitudSecuencia) {
         List<String> combinaciones = new ArrayList<>();
         for (int i = 1; i < longitudSecuencia - 3; i++) {
@@ -119,6 +152,13 @@ public class MutanteServiceImpl implements MutanteService {
         return combinaciones;
     }
 
+    /**
+     * Permite obtener las combinaciones del inferior derecho de la matriz
+     * 
+     * @param secuenciaDna
+     * @param longitudSecuencia
+     * @return
+     */
     private List<String> obtenerInfDer(char[][] secuenciaDna, int longitudSecuencia) {
         List<String> combinaciones = new ArrayList<>();
         for (int i = 0; i < longitudSecuencia - 3; i++) {
@@ -133,6 +173,13 @@ public class MutanteServiceImpl implements MutanteService {
         return combinaciones;
     }
 
+    /**
+     * Permite obtener las combinaciones del superior derecho de la matriz
+     * 
+     * @param secuenciaDna
+     * @param longitudSecuencia
+     * @return
+     */
     private List<String> obtenerSupDer(char[][] secuenciaDna, int longitudSecuencia) {
         List<String> combinaciones = new ArrayList<>();
         for (int i = 1; i < longitudSecuencia - 3; i++) {
@@ -147,20 +194,56 @@ public class MutanteServiceImpl implements MutanteService {
         return combinaciones;
     }
 
+    /**
+     * Permite validar si se encontro una cadena mutante en las combinaciones obtenidas
+     * 
+     * @param combinaciones
+     * @return
+     */
     private boolean validarEsMutante(List<String> combinaciones) {
         List<String> cadenasMutantes = combinaciones.parallelStream()
                 .filter(elt -> elt.toLowerCase().contains(Constantes.MUTANTE_A) || elt.toLowerCase().contains(Constantes.MUTANTE_G)
                         || elt.toLowerCase().contains(Constantes.MUTANTE_T) || elt.toLowerCase().contains(Constantes.MUTANTE_C))
                 .collect(Collectors.toList());
-        System.out.println(cadenasMutantes);
 
         return !cadenasMutantes.isEmpty();
 
     }
 
+    /**
+     * Permite guardar la secuencia analizada
+     * 
+     * @param tipo
+     * @param secuenciaDna
+     */
     private void guardarSecuencia(String tipo, String[] secuenciaDna) {
         Secuencia secuencia = new Secuencia(tipo, secuenciaDna);
         this.secuenciaRepository.save(secuencia);
+    }
+
+    /**
+     * Permite conocer las estadisticas de los mutantes y humanos analizados
+     */
+    @Override
+    public ResponseEntity<Response> getEstado() {
+        Response response = null;
+        try {
+            Integer mutantes = this.secuenciaRepository.countByTipoSecuencia(Constantes.MUTANTE);
+            Integer humanos = this.secuenciaRepository.countByTipoSecuencia(Constantes.HUMANO);
+            response = new Response();
+            response.setCountMutantDna(mutantes);
+            response.setCountHumanDan(humanos);
+            if (mutantes > 0 && humanos > 0) {
+                response.setRatio((double) ((100 * mutantes) / humanos) / 100);
+            } else {
+                response.setRatio(0.0);
+            }
+
+            return ResponseEntity.ok().body(response);
+        } catch (Exception e) {
+            LOGGER.info(e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR.value()).body(null);
+        }
     }
 
 }

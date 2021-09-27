@@ -10,4 +10,6 @@ public interface SecuenciaRepository extends MongoRepository<Secuencia, String> 
 
     Optional<Secuencia> findById(String secuenciaDna);
 
+    Integer countByTipoSecuencia(String typoSecuencia);
+
 }
