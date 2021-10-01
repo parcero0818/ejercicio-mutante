@@ -206,7 +206,7 @@ public class MutanteBusinessImpl implements MutanteBusiness {
                         || elt.toLowerCase().contains(Constantes.MUTANTE_T) || elt.toLowerCase().contains(Constantes.MUTANTE_C))
                 .collect(Collectors.toList());
 
-        return !cadenasMutantes.isEmpty();
+        return cadenasMutantes.size() > 1;
 
     }
 

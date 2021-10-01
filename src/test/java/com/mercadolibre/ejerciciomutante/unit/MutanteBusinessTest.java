@@ -21,7 +21,7 @@ import com.mercadolibre.ejerciciomutante.repository.SecuenciaRepository;
 public class MutanteBusinessTest {
 
     private final String[] DNA_MUTANT = { "ATGCGA", "CAGTGC", "TTATGT", "AGAAGG", "CCCCTA", "TCACTG" };
-    private final String[] DNA_HUMAN = { "ATGCCA", "CCGTGC", "TTATGT", "AGAAGG", "CTCCTA", "TCACTG" };
+    private final String[] DNA_HUMAN = { "TTTTTT", "CCGTGC", "TTATGT", "AGAAGG", "CTCCTA", "TCACTG" };
     private final String[] DNA_INVALID = { "KKKKK", "CCGTGC", "TTATGT", "AGAAGG", "CTCCTA", "TCACTG" };
 
     @Autowired
